@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Office Tour - Immersive Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            overflow: hidden;
+            font-weight: 400;
+        }
+
+        #viewer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Enhanced controls with glassmorphism design */
+        .controls {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Enhanced modern translucent button design */
+        .location-btn {
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(24px) saturate(180%);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        /* Modern shimmer effect */
+        .location-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.15), 
+                transparent
+            );
+            transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .location-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Enhanced hover state with better translucency */
+        .location-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 16px 48px rgba(0, 0, 0, 0.2),
+                0 4px 16px rgba(59, 130, 246, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 1);
+        }
+
+        /* Modern active state with gradient accent */
+        .location-btn.active {
+            background: linear-gradient(
+                135deg, 
+                rgba(59, 130, 246, 0.2) 0%, 
+                rgba(147, 51, 234, 0.15) 100%
+            );
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            box-shadow: 
+                0 12px 40px rgba(59, 130, 246, 0.2),
+                0 4px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .location-btn .emoji {
+            font-size: 18px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Enhanced info panel with better translucency */
+        .info-panel {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 28px;
+            border-radius: 20px;
+            max-width: 320px;
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 16px 48px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: translateY(0);
+            transition: all 0.4s ease;
+        }
+
+        .info-panel:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 56px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Enhanced navigation help with modern translucency */
+        .navigation-help {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px 24px;
+            border-radius: 16px;
+            font-size: 13px;
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .help-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .help-item:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .help-item .icon {
+            font-size: 16px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Enhanced loading panel with modern translucency */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 48px;
+            border-radius: 24px;
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 20px 56px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid rgba(59, 130, 246, 0.8);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        /* Enhanced error styling with modern translucency */
+        .error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #f87171;
+            z-index: 1001;
+            background: rgba(248, 113, 113, 0.08);
+            padding: 48px;
+            border-radius: 24px;
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            box-shadow: 
+                0 20px 56px rgba(248, 113, 113, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+        }
+
+        .error h2 {
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .error p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: rgba(248, 113, 113, 0.8);
+        }
+
+        /* Enhanced hotspot styling with modern translucency */
+        .hotspot-info, .hotspot-link {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            padding: 14px 20px !important;
+            border-radius: 20px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            box-shadow: 
+                0 8px 24px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            min-width: 140px !important;
+            text-align: center !important;
+        }
+
+        .hotspot-info {
+            border-color: rgba(59, 130, 246, 0.3) !important;
+        }
+
+        .hotspot-link {
+            border-color: rgba(16, 185, 129, 0.3) !important;
+        }
+
+        /* Responsive design improvements */
+        @media (max-width: 768px) {
+            .controls {
+                top: 16px;
+                left: 16px;
+                gap: 8px;
+            }
+
+            .location-btn {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+
+            .info-panel {
+                top: 16px;
+                right: 16px;
+                max-width: 280px;
+                padding: 20px;
+            }
+
+            .navigation-help {
+                bottom: 16px;
+                left: 16px;
+                gap: 16px;
+                font-size: 12px;
+            }
+
+            .help-item {
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navigation-help {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        /* Add subtle entrance animations */
+        .controls, .info-panel, .navigation-help {
+            animation: slideInFade 0.8s ease-out;
+        }
+
+        @keyframes slideInFade {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="viewer"></div>
+    
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading Virtual Tour...</p>
+    </div>
+
+    <div class="controls" id="controls" style="display: none;">
+        <button class="location-btn" data-scene="lobby">
+            <span class="emoji">🏢</span> Reception
+        </button>
+        <button class="location-btn" data-scene="office">
+            <span class="emoji">👥</span> Workspace
+        </button>
+        <button class="location-btn" data-scene="printer">
+            <span class="emoji">🖨️</span> Printer Area
+        </button>
+    </div>
+
+    <div class="info-panel" id="infoPanel" style="display: none;">
+        <h3 id="locationName">Reception</h3>
+        <p id="locationDesc">Welcome area and front desk</p>
+    </div>
+
+    <div class="navigation-help">
+        <div class="help-item">
+            <span class="icon">🖱️</span> Drag to look around
+        </div>
+        <div class="help-item">
+            <span class="icon">🔍</span> Scroll to zoom
+        </div>
+        <div class="help-item">
+            <span class="icon">📱</span> Touch gestures
+        </div>
+        <div class="help-item">
+            <span class="icon">⌨️</span> Press ESC to close
+        </div>
+    </div>
+
+    <script src="/virtual-tour/marzipano.js"></script>
+    <script src="/virtual-tour/data.js"></script>
+    <script>
+        let viewer;
+        let sceneMap = {};
+        let currentScene = 'lobby';
+
+        const locationInfo = {
+            lobby: {
+                name: 'Reception',
+                description: 'Welcome area and front desk. This is where visitors check in and employees start their day.'
+            },
+            office: {
+                name: 'Workspace',
+                description: 'Open collaborative workspace with hot-desking options. Features standing desks and quiet zones.'
+            },
+            printer: {
+                name: 'Printer Area',
+                description: 'Multi-function printers, office supplies, and coffee station. Perfect for informal meetings.'
+            }
+        };
+
+        // Get initial scene from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialScene = urlParams.get('scene') || 'lobby';
+        currentScene = initialScene;
+
+        function showError(message) {
+            document.getElementById('loading').innerHTML = `
+                <div class="error">
+                    <h2>⚠️ Error Loading Tour</h2>
+                    <p>${message}</p>
+                    <p style="margin-top: 12px; opacity: 0.7;">Please check that the virtual tour assets are properly configured.</p>
+                </div>
+            `;
+        }
+
+        function initViewer() {
+            try {
+                if (!window.Marzipano) {
+                    throw new Error('Marzipano library not loaded');
+                }
+
+                if (!window.APP_DATA) {
+                    throw new Error('Tour data not loaded');
+                }
+
+                const viewerEl = document.getElementById('viewer');
+                viewer = new window.Marzipano.Viewer(viewerEl);
+
+                const scenes = window.APP_DATA.scenes || [];
+                
+                scenes.forEach(sceneData => {
+                    const url = `/virtual-tour/assets/${sceneData.id}.jpeg`;
+                    const source = window.Marzipano.ImageUrlSource.fromString(url);
+                    const geometry = new window.Marzipano.EquirectGeometry([{ width: 4000 }]);
+                    
+                    const limiter = window.Marzipano.RectilinearView.limit.traditional(
+                        4096,
+                        100 * Math.PI / 180,
+                        120 * Math.PI / 180
+                    );
+
+                    const view = new window.Marzipano.RectilinearView(
+                        sceneData.initialViewParameters || { yaw: 0, pitch: 0, fov: Math.PI / 2 },
+                        limiter
+                    );
+
+                    const scene = viewer.createScene({ source, geometry, view, pinFirstLevel: true });
+                    
+                    // Add hotspots if available
+                    if (sceneData.hotSpots) {
+                        sceneData.hotSpots.forEach(hotspot => {
+                            const hotspotElement = createHotspotElement(hotspot);
+                            scene.hotspotContainer().createHotspot(hotspotElement, {
+                                yaw: hotspot.yaw,
+                                pitch: hotspot.pitch
+                            });
+                        });
+                    }
+                    
+                    sceneMap[sceneData.id] = scene;
+                });
+
+                // Setup controls
+                setupControls();
+                
+                // Switch to initial scene
+                switchToScene(currentScene);
+                
+                // Hide loading, show controls
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('controls').style.display = 'flex';
+                document.getElementById('infoPanel').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Viewer initialization error:', error);
+                showError(error.message);
+            }
+        }
+
+        function setupControls() {
+            const buttons = document.querySelectorAll('.location-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sceneId = btn.getAttribute('data-scene');
+                    switchToScene(sceneId);
+                });
+            });
+        }
+
+        function switchToScene(sceneId) {
+            if (!sceneMap[sceneId]) {
+                console.error('Scene not found:', sceneId);
+                return;
+            }
+
+            sceneMap[sceneId].switchTo({ transitionDuration: 800 });
+            currentScene = sceneId;
+            
+            // Update UI
+            updateActiveButton(sceneId);
+            updateInfoPanel(sceneId);
+        }
+
+        function updateActiveButton(sceneId) {
+            document.querySelectorAll('.location-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-scene') === sceneId) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function updateInfoPanel(sceneId) {
+            const info = locationInfo[sceneId];
+            if (info) {
+                document.getElementById('locationName').textContent = info.name;
+                document.getElementById('locationDesc').textContent = info.description;
+            }
+        }
+
+        function createHotspotElement(hotspot) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'hotspot';
+            
+            if (hotspot.type === 'info') {
+                wrapper.innerHTML = `
+                    <div class="hotspot-info">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 18px;">ℹ️</span>
+                            <span>${hotspot.text}</span>
+                        </div>
+                    </div>
+                `;
+                
+                wrapper.addEventListener('click', () => {
+                    alert(hotspot.description || hotspot.text);
+                });
+                
+            } else if (hotspot.type === 'link') {
+                wrapper.innerHTML = `
+                    <div class="hotspot-link">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 18px;">🔗</span>
+                            <span>${hotspot.text}</span>
+                        </div>
+                    </div>
+                `;
+                
+                wrapper.addEventListener('click', () => {
+                    if (hotspot.target) {
+                        switchToScene(hotspot.target);
+                    }
+                });
+            }
+
+            const hotspotEl = wrapper.querySelector('.hotspot-info, .hotspot-link');
+            if (hotspotEl) {
+                wrapper.addEventListener('mouseenter', () => {
+                    hotspotEl.style.transform = 'scale(1.1) translateY(-4px)';
+                    hotspotEl.style.boxShadow = '0 12px 32px rgba(0,0,0,0.5)';
+                });
+                
+                wrapper.addEventListener('mouseleave', () => {
+                    hotspotEl.style.transform = 'scale(1) translateY(0)';
+                    hotspotEl.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+                });
+            }
+
+            return wrapper;
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                window.close();
+            }
+        });
+
+        // Initialize when DOM and scripts are loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initViewer);
+        } else {
+            initViewer();
+        }
+    </script>
+</body>
+</html>
