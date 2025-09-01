@@ -515,10 +515,25 @@ const Interviews: React.FC = () => {
                   </div>
                   <div className="text-sm">15:30 / 60:00</div>
                 </div>
-                <div className="bg-gray-800 rounded p-4 text-center text-gray-400">
-                  Video Stream Placeholder
-                  <br />
-                  <small>Candidate: John Smith</small>
+                <div className="bg-gray-800 rounded overflow-hidden">
+                  <video 
+                    className="w-full h-64 object-cover"
+                    controls
+                    poster="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&q=80"
+                  >
+                    <source 
+                      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
+                      type="video/mp4"
+                    />
+                    <div className="text-center text-gray-400 p-4">
+                      Your browser does not support the video tag.
+                      <br />
+                      <small>Candidate: John Smith</small>
+                    </div>
+                  </video>
+                  <div className="p-2 text-center">
+                    <small className="text-gray-400">Candidate: John Smith</small>
+                  </div>
                 </div>
               </div>
 

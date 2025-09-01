@@ -352,6 +352,10 @@ const Recruit: React.FC = () => {
   }
 
   async function uploadResumes() {
+    console.log("🔥 uploadResumes function called!");
+    console.log("jobId:", jobId);
+    console.log("uploadedFiles.length:", uploadedFiles.length);
+    
     if (!jobId) return alert("Create or pick a job first.");
     if (uploadedFiles.length === 0)
       return alert("Please choose one or more PDF resumes.");
@@ -359,17 +363,36 @@ const Recruit: React.FC = () => {
     try {
       console.log("📁 Uploading resumes to AI service...");
       
+      // First test if AI service is accessible
+      console.log("Testing AI service accessibility...");
+      try {
+        const testResponse = await fetch('http://localhost:8000/');
+        console.log("AI service test status:", testResponse.status);
+        const testText = await testResponse.text();
+        console.log("AI service test response:", testText);
+      } catch (testError) {
+        console.error("AI service test failed:", testError);
+        throw new Error("AI service is not accessible");
+      }
+      
       // Try real upload to AI service first
+      console.log(`Uploading ${uploadedFiles.length} files for job ${jobId}`);
+      
       const formData = new FormData();
       uploadedFiles.forEach(file => {
+        console.log(`Adding file: ${file.name} (${file.size} bytes)`);
         formData.append('files', file);
       });
       formData.append('job_id', jobId);
       
+      console.log("Sending request to:", 'http://localhost:8000/api/resumes/upload');
       const response = await fetch('http://localhost:8000/api/resumes/upload', {
         method: 'POST',
         body: formData,
       });
+      
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
       
       if (response.ok) {
         const result = await response.json();
@@ -385,7 +408,10 @@ const Recruit: React.FC = () => {
         alert(`Successfully uploaded ${uploadedFiles.length} files to AI service.`);
         setUploadedFiles([]);
       } else {
-        throw new Error(`Upload failed: ${response.status}`);
+        const errorText = await response.text();
+        console.error("Upload failed with status:", response.status);
+        console.error("Error response:", errorText);
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
       }
     } catch (e) {
       console.error("Upload to AI service failed:", e);
@@ -425,6 +451,10 @@ const Recruit: React.FC = () => {
   }
 
   async function processWithAI() {
+    console.log("🔥 processWithAI function called!");
+    console.log("jobId:", jobId);
+    console.log("serverFiles.length:", serverFiles.length);
+    
     if (!jobId) return alert("Create or pick a job first.");
     if (serverFiles.length === 0) return alert("Upload some resumes first.");
     setProcessing(true);
@@ -432,23 +462,34 @@ const Recruit: React.FC = () => {
       console.log("🤖 Processing resumes with AI service...");
       
       // Try real AI processing first
+      console.log(`Processing ${serverFiles.length} files for job ${jobId}`);
+      console.log("Files to process:", serverFiles);
+      
+      const requestBody = {
+        job_id: jobId,
+        files: serverFiles
+      };
+      console.log("Sending request body:", requestBody);
+      
       const response = await fetch('http://localhost:8000/api/resumes/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          job_id: jobId,
-          files: serverFiles
-        }),
+        body: JSON.stringify(requestBody),
       });
+      
+      console.log("Process response status:", response.status);
       
       if (response.ok) {
         const result = await response.json();
         console.log("✅ AI processing completed!", result);
         alert(`Successfully processed ${result.processed_count || serverFiles.length} candidates with AI. You can now run evaluation in the AI Screening tab.`);
       } else {
-        throw new Error(`Processing failed: ${response.status}`);
+        const errorText = await response.text();
+        console.error("Processing failed with status:", response.status);
+        console.error("Error response:", errorText);
+        throw new Error(`Processing failed: ${response.status} - ${errorText}`);
       }
     } catch (e) {
       console.error("AI processing failed:", e);

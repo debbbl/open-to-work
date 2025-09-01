@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, Query, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import List, Optional
 import os
 from pathlib import Path
@@ -37,14 +37,17 @@ class Education(BaseModel):
         description="Additional details about the education, such as courseworks, or achievements.",
     )
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
+    @classmethod
     def handle_invalid_values(cls, values):
-        for key, value in values.items():
-            if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
-                values[key] = None
+        if isinstance(values, dict):
+            for key, value in values.items():
+                if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
+                    values[key] = None
         return values
 
     @field_validator("details", mode="before")
+    @classmethod
     def validate_details(cls, v):
         if isinstance(v, str) and v.lower() in {"n/a", "none", ""}:
             return ["None"]
@@ -77,14 +80,17 @@ class Experience(BaseModel):
         description="A list of responsibilities and tasks handled during the job.",
     )
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
+    @classmethod
     def handle_invalid_values(cls, values):
-        for key, value in values.items():
-            if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
-                values[key] = None
+        if isinstance(values, dict):
+            for key, value in values.items():
+                if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
+                    values[key] = None
         return values
 
     @field_validator("responsibilities", mode="before")
+    @classmethod
     def validate_responsibilities(cls, v):
         if isinstance(v, str) and v.lower() in {"n/a", "none", ""}:
             return ["None"]
@@ -101,11 +107,13 @@ class Project(BaseModel):
         None, description="The description of the project."
     )
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
+    @classmethod
     def handle_invalid_values(cls, values):
-        for key, value in values.items():
-            if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
-                values[key] = None
+        if isinstance(values, dict):
+            for key, value in values.items():
+                if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
+                    values[key] = None
         return values
 
 
@@ -155,15 +163,18 @@ class ApplicantProfile(BaseModel):
         description="Candidate's primary business function (e.g., Marketing, Finance, IT) based on his role in current company. Return only the core function.",
     )
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
+    @classmethod
     def handle_invalid_values(cls, values):
-        for key, value in values.items():
-            if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
-                values[key] = None
+        if isinstance(values, dict):
+            for key, value in values.items():
+                if isinstance(value, str) and value.lower() in {"n/a", "none", ""}:
+                    values[key] = None
         return values
 
     @field_validator("skills", mode="before")
-    def validate_details(cls, v):
+    @classmethod
+    def validate_skills(cls, v):
         if isinstance(v, str) and v.lower() in {"n/a", "none", ""}:
             return ["None"]
         elif not isinstance(v, list):
@@ -519,16 +530,21 @@ def delete_uploaded_file(
     raise HTTPException(status_code=404, detail="File not found")
 
 
+class ProcessRequest(BaseModel):
+    job_id: str
+    files: Optional[List[str]] = []
+
 @router.post(
     "/resumes/process",
     response_model=dict,
     summary="Parse, summarize & insert candidates to Weaviate",
 )
-def process_resumes(job_id: str = Form(..., examples=["769a7894"])):
+def process_resumes(request: ProcessRequest):
     """
     Process all uploaded PDFs for a job ID: extract content, parse candidate data,
     generate summaries, and insert into Weaviate database
     """
+    job_id = request.job_id
     if not job_id:
         raise HTTPException(status_code=422, detail="job_id is required")
 
