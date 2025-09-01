@@ -5,8 +5,9 @@
 ---
 
 ## 👥 Team Members  
-- **Shi Ting** – Fullstack Developer  
-- **Jin Khye** – Business Analyst / QA & AI Engineer  
+- **Tan Shun Qi** – AI Engineer 
+- **Lim Shi Ting** – Fullstack Developer  
+- **Tan Jin Khye** – Business Analyst / QA & AI Engineer  
 
 ---
 
