@@ -1,34 +1,30 @@
-# FutureReady - AI-Powered Recruitment Platform
+# TalentHub  
 
-An intelligent recruitment management system that leverages AI to streamline hiring processes with automated interview question generation, offer letter creation, and compensation analysis.
+### 🚀 Open To Work – Smarter Hiring, Seamless Onboarding  
 
-## Team Members
+---
 
-- **[Your Name]** - Full Stack Developer & AI Integration
-- **[Team Member 2]** - [Role]
-- **[Team Member 3]** - [Role]
-- **[Team Member 4]** - [Role]
+## 👥 Team Members  
+- **Shi Ting** – Fullstack Developer  
+- **Jin Khye** – Business Analyst / QA & AI Engineer  
 
-*[Add actual team member names and roles]*
+---
 
-## Problem and Solution Summary
+## 📌 Problem & Solution Summary  
 
-### Problem
-Modern recruitment processes are time-consuming, inconsistent, and often lack personalization. HR teams struggle with:
-- Creating relevant interview questions for different candidates and roles
-- Writing personalized offer letters that align with market standards
-- Conducting fair compensation analysis across different markets and roles
-- Managing the entire recruitment pipeline efficiently
+### The Problem  
+1. **Inefficient Recruitment** – Manual resume screening slows hiring cycles, delaying the process and causing companies to lose top talent.  
+2. **Ineffective Onboarding** – New hires feel lost without structured guidance, reducing productivity and engagement from day one.  
 
-### Solution
-FutureReady is an AI-powered recruitment platform that automates and optimizes the hiring process:
+### Our Solution – **TalentHub**  
+An **AI-powered end-to-end talent platform** that helps SMEs hire smarter, faster, and onboard seamlessly.  
 
-- **🧠 AI Interview Assistant**: Generates personalized interview questions based on candidate profiles, experience levels, and job requirements using Google Gemini AI
-- **📄 Smart Offer Generation**: Creates customized offer letters with AI-powered compensation analysis and market benchmarking
-- **📊 Recruitment Analytics**: Comprehensive dashboard for tracking candidates, interviews, and hiring metrics
-- **🎯 Intelligent Matching**: AI-driven candidate screening and ranking system
-- **💼 End-to-End Pipeline**: Complete recruitment workflow from job posting to onboarding
+- **Recruit Smarter**: AI resume parsing, bias-free screening, automated candidate-job matching.  
+- **Interview Intelligently**: Auto-generated interview questions, AI-powered live assistant, and summaries.  
+- **Onboard Seamlessly**: AI onboarding chatbot, buddy matching, gamified learning, and virtual office tours.  
+- **HR Insights at a Glance**: Analytics dashboards tracking time-to-hire, drop-off rates, onboarding completion, and candidate sources.  
 
+---
 ## Technology Stack Used
 
 ### Frontend
@@ -115,91 +111,8 @@ AI_SERVICE_URL=http://localhost:8000
 
 **Python AI Service (.env):**
 ```env
-GEMINI_API_KEY=AIzaSyA-gPsqqK6nXOxmoXUjT2llNMQOY1ArPxI
+GEMINI_API_KEY= API_KEY
 ```
-
-### 6. Database Setup
-1. Create a Supabase project
-2. Run the provided SQL schema (check `backend/database/schema.sql`)
-3. Update environment variables with your Supabase credentials
-
-## Features Demo
-
-### 🎯 AI Job Description Generation
-1. Navigate to **Recruit** → **Jobs** tab
-2. Enter job title (e.g., "Senior Frontend Developer")
-3. Fill in requirements: skills, experience, responsibilities
-4. Click **"Generate Description with AI"** to use real Gemini AI
-5. Get a professional, detailed job description tailored to your requirements
-
-### 🎯 AI Interview Questions
-1. Navigate to **Interviews** → **AI Questions** tab
-2. Select a candidate and interview type (Technical, Behavioral, System Design, Cultural Fit)
-3. Choose difficulty level (Junior, Mid-level, Senior)
-4. Click **Generate Questions** to get AI-powered, personalized interview questions
-5. Each question includes follow-up prompts and evaluation criteria
-
-### 📋 Smart Offer Letters  
-1. Go to **Offers** → **Letter Automation** tab
-2. Fill in candidate details (name, position, salary, start date, location)
-3. Click **Generate Offer Letter** for AI-created, professional offer letters
-4. Letters are personalized based on role, location, and compensation details
-
-### 💰 Compensation Analysis
-1. In **Offers** → **Compensation** tab
-2. Enter job title and location
-3. Click **Get Market Data** for AI-powered salary analysis
-4. View market averages, competitive ranges, and AI recommendations
-5. Get insights on market trends and equity suggestions
-
-### 📊 Recruitment Pipeline
-- Track candidates through different stages (Applied → Screening → Interview → Offer → Hired)
-- View analytics and hiring metrics
-- Manage interview scheduling and feedback
-- Monitor offer acceptance rates and time-to-hire
-
-## Project Structure
-
-```
-futureReady/
-├── frontend/                 # React TypeScript frontend
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/          # Main application pages
-│   │   ├── services/       # API communication
-│   │   └── types/          # TypeScript type definitions
-│   └── public/             # Static assets
-├── backend/                 # Node.js backend services
-│   ├── src/
-│   │   ├── routes/         # API endpoints
-│   │   ├── models/         # Data models
-│   │   ├── services/       # Business logic
-│   │   └── utils/          # Helper functions
-│   └── python-ai-service/  # Python AI microservice
-│       ├── app/
-│       │   ├── routers/    # FastAPI routes
-│       │   └── services/   # AI service logic
-│       └── requirements.txt
-└── README.md
-```
-
-## API Endpoints
-
-### Interview AI Service
-- `POST /api/interviews/ai/questions` - Generate AI interview questions
-- `GET /api/interviews/ai/categories` - Get question categories and difficulty levels
-- `GET /api/interviews/ai/health` - AI service health check
-
-### Offer AI Service  
-- `POST /api/offers/ai/generate-letter` - Generate AI offer letters
-- `POST /api/offers/ai/market-analysis` - AI compensation analysis
-- `GET /api/offers/ai/templates` - Available offer templates
-- `POST /api/offers/ai/compensation-recommendations` - Personalized compensation advice
-
-### Standard CRUD Operations
-- Candidates, Jobs, Interviews, Offers management
-- Analytics and reporting endpoints
-- User authentication and authorization
 
 ## Reflection on Challenges and Learnings
 
@@ -247,23 +160,6 @@ futureReady/
    - Microservices architecture enables technology stack flexibility
    - Proper error boundaries prevent AI failures from breaking the entire app
 
-### Future Improvements
-
-- **Enhanced AI Features**: Implement conversation-based interview assistance
-- **Advanced Analytics**: Add predictive hiring analytics and bias detection
-- **Mobile Application**: Develop mobile app for on-the-go recruitment management
-- **Integration Ecosystem**: Connect with popular ATS systems and job boards
-- **Multilingual Support**: Expand AI capabilities to support multiple languages
-
-### Technical Debt and Optimizations
-
-- **Performance**: Implement caching for AI responses and database queries
-- **Security**: Add comprehensive input validation and API rate limiting
-- **Testing**: Expand test coverage for AI service integration
-- **Documentation**: Create comprehensive API documentation with OpenAPI/Swagger
-
 ---
 
-**Built with ❤️ for [Hackathon Name] 2024**
-
-*This project demonstrates the potential of AI in transforming recruitment processes, making them more efficient, fair, and data-driven.*
+**Built with ❤️ for FutureReady Hackathon 2025**
