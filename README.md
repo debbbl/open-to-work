@@ -52,11 +52,6 @@ An **AI-powered end-to-end talent platform** that helps SMEs hire smarter, faste
 - **Vector embeddings** for intelligent candidate matching
 - **RESTful APIs** for service communication
 
-### Development Tools
-- **Git** for version control
-- **ESLint** and **Prettier** for code quality
-- **PostCSS** for CSS processing
-
 ## Setup Instructions
 
 ### Prerequisites
