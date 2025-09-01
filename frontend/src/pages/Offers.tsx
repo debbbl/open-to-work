@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FileText, DollarSign, Calendar, TrendingUp, Clock, CheckCircle, XCircle, Brain, Zap, BarChart3, Edit, Send, Eye } from 'lucide-react'
+import { FileText, DollarSign, Calendar, TrendingUp, Clock, CheckCircle, XCircle, Brain, Zap, BarChart3, Edit, Send, Eye, Loader2 } from 'lucide-react'
 import { Offer, Candidate } from '../types'
 import { offersAPI, candidatesAPI } from '../services/api'
 
@@ -9,6 +9,20 @@ const Offers: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('automation')
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null)
+  
+  // AI Offer Generation State
+  const [generatedOfferLetter, setGeneratedOfferLetter] = useState<any>(null)
+  const [generatingOffer, setGeneratingOffer] = useState(false)
+  const [marketAnalysis, setMarketAnalysis] = useState<any>(null)
+  const [analyzingMarket, setAnalyzingMarket] = useState(false)
+  const [offerFormData, setOfferFormData] = useState({
+    candidateName: '',
+    position: '',
+    salary: '',
+    startDate: '',
+    location: '',
+    department: 'Engineering'
+  })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,6 +45,122 @@ const Offers: React.FC = () => {
 
     fetchData()
   }, [])
+
+  const generateAIOfferLetter = async () => {
+    if (!offerFormData.candidateName || !offerFormData.position || !offerFormData.salary) {
+      alert('Please fill in candidate name, position, and salary')
+      return
+    }
+
+    setGeneratingOffer(true)
+    try {
+      const candidateInfo = {
+        name: offerFormData.candidateName,
+        position: offerFormData.position,
+        skills: ['React', 'TypeScript'], // Mock skills
+        experience: 5
+      }
+
+      const positionDetails = {
+        title: offerFormData.position,
+        department: offerFormData.department,
+        start_date: offerFormData.startDate || '2024-03-01',
+        location: offerFormData.location || 'San Francisco, CA',
+        reports_to: 'Engineering Manager'
+      }
+
+      const compensation = {
+        base_salary: parseInt(offerFormData.salary),
+        equity_shares: 1000,
+        signing_bonus: 5000,
+        bonus_percentage: 10
+      }
+
+      const companyInfo = {
+        name: 'TechCorp Inc.'
+      }
+
+      // Simulate AI processing with mock data for demo
+      await new Promise(resolve => setTimeout(resolve, 2500))
+      
+      const mockOfferLetter = getMockOfferLetter()
+      setGeneratedOfferLetter(mockOfferLetter)
+    } catch (error) {
+      console.error('Error generating offer letter:', error)
+      // Fallback to mock offer letter
+      setGeneratedOfferLetter(getMockOfferLetter())
+    } finally {
+      setGeneratingOffer(false)
+    }
+  }
+
+  const analyzeMarketCompensation = async () => {
+    if (!offerFormData.position || !offerFormData.location) {
+      alert('Please fill in position and location')
+      return
+    }
+
+    setAnalyzingMarket(true)
+    try {
+      // Simulate AI processing with mock data for demo
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      const mockMarketData = getMockMarketData()
+      setMarketAnalysis(mockMarketData)
+    } catch (error) {
+      console.error('Error analyzing market:', error)
+      // Fallback to mock market data
+      setMarketAnalysis(getMockMarketData())
+    } finally {
+      setAnalyzingMarket(false)
+    }
+  }
+
+  const getMockOfferLetter = () => {
+    return {
+      content: `Dear ${offerFormData.candidateName},
+
+We are pleased to offer you the position of ${offerFormData.position} with TechCorp Inc.
+
+POSITION DETAILS:
+• Title: ${offerFormData.position}
+• Department: ${offerFormData.department}
+• Start Date: ${offerFormData.startDate}
+• Location: ${offerFormData.location}
+
+COMPENSATION PACKAGE:
+• Annual Base Salary: $${parseInt(offerFormData.salary).toLocaleString()}
+• Stock Options: 1,000 shares
+• Benefits: Health, dental, vision insurance, 401k matching
+
+We look forward to your acceptance of this offer.
+
+Sincerely,
+TechCorp Hiring Team`,
+      generated_at: new Date().toISOString(),
+      status: 'generated',
+      format: 'full_letter',
+      fallback: true
+    }
+  }
+
+  const getMockMarketData = () => {
+    const baseSalary = parseInt(offerFormData.salary) || 125000
+    return {
+      market_average: { min: Math.round(baseSalary * 0.85), max: Math.round(baseSalary * 1.15) },
+      competitive_range: { min: Math.round(baseSalary * 0.9), max: Math.round(baseSalary * 1.25) },
+      top_tier: { min: Math.round(baseSalary * 1.15), max: Math.round(baseSalary * 1.45) },
+      recommendations: [
+        'Offer within competitive range to ensure acceptance',
+        'Consider equity package for total compensation appeal'
+      ],
+      trends: [
+        'Frontend developer salaries trending up 8% this year',
+        'San Francisco market showing strong demand'
+      ],
+      fallback: true
+    }
+  }
 
   if (loading) {
     return (
@@ -77,13 +207,57 @@ const Offers: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Auto-filled Offer Templates</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select Candidate</label>
-                <select className="input-field" onChange={(e) => setSelectedCandidate(e.target.value)}>
-                  <option value="">Choose candidate...</option>
-                  <option value="john">John Smith - Frontend Developer</option>
-                  <option value="sarah">Sarah Wilson - Product Manager</option>
-                  <option value="mike">Mike Johnson - Data Scientist</option>
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Candidate Name</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Enter candidate name"
+                  value={offerFormData.candidateName}
+                  onChange={(e) => setOfferFormData(prev => ({ ...prev, candidateName: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g., Senior Frontend Developer"
+                  value={offerFormData.position}
+                  onChange={(e) => setOfferFormData(prev => ({ ...prev, position: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Annual Salary</label>
+                <input
+                  type="number"
+                  className="input-field"
+                  placeholder="e.g., 130000"
+                  value={offerFormData.salary}
+                  onChange={(e) => setOfferFormData(prev => ({ ...prev, salary: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  className="input-field"
+                  value={offerFormData.startDate}
+                  onChange={(e) => setOfferFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g., San Francisco, CA"
+                  value={offerFormData.location}
+                  onChange={(e) => setOfferFormData(prev => ({ ...prev, location: e.target.value }))}
+                />
               </div>
 
               <div>
@@ -103,9 +277,22 @@ const Offers: React.FC = () => {
                   <span className="font-medium text-blue-900">AI Template Generator</span>
                 </div>
                 <p className="text-blue-800 text-sm mb-3">Generate personalized offer letter based on role, location, and candidate profile</p>
-                <button className="btn-primary text-sm">
-                  <Zap className="h-4 w-4 mr-1" />
-                  Generate Offer Letter
+                <button 
+                  className="btn-primary text-sm w-full"
+                  onClick={generateAIOfferLetter}
+                  disabled={generatingOffer || !offerFormData.candidateName || !offerFormData.position}
+                >
+                  {generatingOffer ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-1" />
+                      Generate Offer Letter
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -126,55 +313,29 @@ const Offers: React.FC = () => {
 
           {/* Template Preview */}
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Offer Letter Preview</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              AI-Generated Offer Letter
+              {generatedOfferLetter && (
+                <span className="ml-2 text-sm text-green-600">
+                  <CheckCircle className="h-4 w-4 inline mr-1" />
+                  Generated {generatedOfferLetter.fallback ? '(Fallback)' : 'with AI'}
+                </span>
+              )}
+            </h3>
             <div className="bg-gray-50 p-4 rounded-lg mb-4 h-80 overflow-y-auto text-sm">
-              {selectedCandidate ? (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h4 className="font-bold text-lg">Job Offer Letter</h4>
-                    <p className="text-gray-600">TechCorp Inc.</p>
-                  </div>
-                  
-                  <div>
-                    <p>Dear John Smith,</p>
-                    <p className="mt-2">We are pleased to offer you the position of <strong>Senior Frontend Developer</strong> with TechCorp Inc.</p>
-                  </div>
-
-                  <div>
-                    <h5 className="font-medium">Position Details:</h5>
-                    <ul className="list-disc list-inside text-gray-700 space-y-1">
-                      <li>Title: Senior Frontend Developer</li>
-                      <li>Department: Engineering</li>
-                      <li>Reports to: Engineering Manager</li>
-                      <li>Start Date: February 15, 2024</li>
-                      <li>Location: San Francisco, CA (Hybrid)</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h5 className="font-medium">Compensation Package:</h5>
-                    <ul className="list-disc list-inside text-gray-700 space-y-1">
-                      <li>Annual Salary: $130,000</li>
-                      <li>Stock Options: 2,000 shares</li>
-                      <li>Signing Bonus: $10,000</li>
-                      <li>Annual Performance Bonus: Up to 15%</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h5 className="font-medium">Benefits:</h5>
-                    <ul className="list-disc list-inside text-gray-700 space-y-1">
-                      <li>Health, Dental, Vision Insurance</li>
-                      <li>401(k) with 6% company match</li>
-                      <li>25 days PTO + holidays</li>
-                      <li>$3,000 annual learning budget</li>
-                      <li>Flexible work arrangements</li>
-                    </ul>
-                  </div>
+              {generatingOffer ? (
+                <div className="text-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-blue-500" />
+                  <p className="text-gray-600">AI is generating your personalized offer letter...</p>
+                </div>
+              ) : generatedOfferLetter ? (
+                <div className="whitespace-pre-line">
+                  {generatedOfferLetter.content}
                 </div>
               ) : (
                 <div className="text-center text-gray-500 mt-20">
-                  Select a candidate to preview the offer letter
+                  <FileText className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>Fill in the form and click "Generate Offer Letter" to create an AI-powered offer</p>
                 </div>
               )}
             </div>
@@ -202,17 +363,24 @@ const Offers: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
-                <input type="text" className="input-field" placeholder="Senior Frontend Developer" />
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Senior Frontend Developer"
+                  value={offerFormData.position}
+                  onChange={(e) => setOfferFormData(prev => ({ ...prev, position: e.target.value }))}
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <select className="input-field">
-                  <option>San Francisco, CA</option>
-                  <option>New York, NY</option>
-                  <option>Austin, TX</option>
-                  <option>Remote</option>
-                </select>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="San Francisco, CA"
+                  value={offerFormData.location}
+                  onChange={(e) => setOfferFormData(prev => ({ ...prev, location: e.target.value }))}
+                />
               </div>
 
               <div>
@@ -233,9 +401,22 @@ const Offers: React.FC = () => {
                 </select>
               </div>
 
-              <button className="btn-primary w-full">
-                <Brain className="h-4 w-4 mr-2" />
-                Get Market Data
+              <button 
+                className="btn-primary w-full"
+                onClick={analyzeMarketCompensation}
+                disabled={analyzingMarket || !offerFormData.position || !offerFormData.location}
+              >
+                {analyzingMarket ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-4 w-4 mr-2" />
+                    Get Market Data
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -243,21 +424,49 @@ const Offers: React.FC = () => {
           {/* Market Insights */}
           <div className="lg:col-span-2 space-y-4">
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Market Compensation Analysis</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">$125K</div>
-                  <div className="text-sm text-blue-800">Market Average</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                AI Market Compensation Analysis
+                {marketAnalysis && (
+                  <span className="ml-2 text-sm text-green-600">
+                    <CheckCircle className="h-4 w-4 inline mr-1" />
+                    Analysis {marketAnalysis.fallback ? '(Fallback)' : 'Complete'}
+                  </span>
+                )}
+              </h3>
+              {analyzingMarket ? (
+                <div className="text-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-blue-500" />
+                  <p className="text-gray-600">AI is analyzing market compensation data...</p>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">$105K - $155K</div>
-                  <div className="text-sm text-green-800">Competitive Range</div>
+              ) : marketAnalysis ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        ${Math.round((marketAnalysis.market_average.min + marketAnalysis.market_average.max) / 2 / 1000)}K
+                      </div>
+                      <div className="text-sm text-blue-800">Market Average</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">
+                        ${Math.round(marketAnalysis.competitive_range.min / 1000)}K - ${Math.round(marketAnalysis.competitive_range.max / 1000)}K
+                      </div>
+                      <div className="text-sm text-green-800">Competitive Range</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">
+                        ${Math.round(marketAnalysis.top_tier.max / 1000)}K
+                      </div>
+                      <div className="text-sm text-purple-800">Top 75th Percentile</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>Fill in job title and location, then click "Get Market Data" for AI-powered analysis</p>
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">$145K</div>
-                  <div className="text-sm text-purple-800">Top 75th Percentile</div>
-                </div>
-              </div>
+              )}
 
               <div className="space-y-4">
                 <div>
@@ -295,29 +504,39 @@ const Offers: React.FC = () => {
             <div className="card">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Recommendations</h3>
               <div className="space-y-3">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="font-medium text-green-900">Competitive Offer</span>
-                  </div>
-                  <p className="text-sm text-green-800">Proposed $130K base salary is above market average and likely to be accepted.</p>
-                </div>
+                {marketAnalysis ? (
+                  marketAnalysis.recommendations?.map((rec: string, index: number) => (
+                    <div key={index} className="p-3 bg-green-50 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-green-900">AI Insight</span>
+                      </div>
+                      <p className="text-sm text-green-800">{rec}</p>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Brain className="h-4 w-4 text-gray-400" />
+                        <span className="font-medium text-gray-600">AI Analysis Pending</span>
+                      </div>
+                      <p className="text-sm text-gray-600">Run market analysis to get personalized recommendations</p>
+                    </div>
+                  </>
+                )}
 
-                <div className="p-3 bg-yellow-50 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <Clock className="h-4 w-4 text-yellow-600" />
-                    <span className="font-medium text-yellow-900">Trending Up</span>
-                  </div>
-                  <p className="text-sm text-yellow-800">Frontend developer salaries have increased 12% in the last 6 months in this market.</p>
-                </div>
-
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <TrendingUp className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium text-blue-900">Equity Suggestion</span>
-                  </div>
-                  <p className="text-sm text-blue-800">Consider 2,000-3,000 stock options to match top-tier companies.</p>
-                </div>
+                {marketAnalysis?.trends && (
+                  marketAnalysis.trends.map((trend: string, index: number) => (
+                    <div key={`trend-${index}`} className="p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <TrendingUp className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium text-blue-900">Market Trend</span>
+                      </div>
+                      <p className="text-sm text-blue-800">{trend}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

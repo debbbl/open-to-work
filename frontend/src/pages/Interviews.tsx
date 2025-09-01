@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, Clock, Video, Phone, User, Plus, Brain, MessageSquare, FileText, BarChart3, Star } from 'lucide-react'
+import { Calendar, Clock, Video, Phone, User, Plus, Brain, MessageSquare, FileText, BarChart3, Star, Loader2, CheckCircle } from 'lucide-react'
 import { Interview, Candidate } from '../types'
 import { interviewsAPI, candidatesAPI } from '../services/api'
 
@@ -8,6 +8,14 @@ const Interviews: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [activeTab, setActiveTab] = useState('schedule')
+  
+  // AI Question Generation State
+  const [generatedQuestions, setGeneratedQuestions] = useState<any[]>([])
+  const [generatingQuestions, setGeneratingQuestions] = useState(false)
+  const [selectedCandidate, setSelectedCandidate] = useState('')
+  const [questionType, setQuestionType] = useState('technical')
+  const [difficultyLevel, setDifficultyLevel] = useState('mid-level')
+  const [questionCategories, setQuestionCategories] = useState<any>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,8 +31,166 @@ const Interviews: React.FC = () => {
       }
     }
 
+    const fetchCategories = async () => {
+      // Use mock data for demo - no external API calls
+      setQuestionCategories({
+        categories: [
+          { id: 'technical', name: 'Technical', description: 'Coding and technical problem solving' },
+          { id: 'behavioral', name: 'Behavioral', description: 'Past experiences and STAR method questions' },
+          { id: 'system_design', name: 'System Design', description: 'Architecture and scalability questions' },
+          { id: 'cultural_fit', name: 'Cultural Fit', description: 'Values, teamwork, and company culture' }
+        ],
+        difficulty_levels: [
+          { id: 'junior', name: 'Junior (1-2 years)', description: 'Entry level questions' },
+          { id: 'mid-level', name: 'Mid-level (3-5 years)', description: 'Intermediate complexity' },
+          { id: 'senior', name: 'Senior (5+ years)', description: 'Advanced and leadership questions' }
+        ]
+      })
+    }
+
     fetchData()
+    fetchCategories()
   }, [])
+
+  const generateAIQuestions = async () => {
+    if (!selectedCandidate) {
+      alert('Please select a candidate first')
+      return
+    }
+
+    setGeneratingQuestions(true)
+    try {
+      // Get candidate data from mock candidates for demo
+      const candidate = mockCandidates.find(c => c.id === selectedCandidate)
+      if (!candidate) return
+
+      // Simulate AI processing with mock data for demo
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Generate personalized mock questions based on candidate and type
+      const questions = getPersonalizedMockQuestions(candidate, questionType, difficultyLevel)
+      setGeneratedQuestions(questions)
+    } catch (error) {
+      console.error('Error generating questions:', error)
+      // Fallback to basic mock questions
+      setGeneratedQuestions(getMockQuestions())
+    } finally {
+      setGeneratingQuestions(false)
+    }
+  }
+
+  const getPersonalizedMockQuestions = (candidate: any, type: string, difficulty: string) => {
+    const questionSets = {
+      technical: {
+        'John Smith': [
+          {
+            category: 'Technical',
+            question: `Given your React and TypeScript experience, how would you implement a custom hook for data fetching with error handling?`,
+            difficulty: difficulty === 'senior' ? 'Hard' : 'Medium',
+            follow_up: 'How would you handle race conditions in this custom hook?',
+            evaluation_criteria: ['React hooks expertise', 'TypeScript knowledge', 'Error handling patterns']
+          },
+          {
+            category: 'Technical', 
+            question: 'Explain the difference between React.memo, useMemo, and useCallback in performance optimization',
+            difficulty: difficulty === 'junior' ? 'Medium' : 'Hard',
+            follow_up: 'When would you choose each optimization technique?',
+            evaluation_criteria: ['Performance optimization', 'React patterns', 'Understanding of re-renders']
+          },
+          {
+            category: 'Technical',
+            question: 'How would you design a scalable component library with TypeScript?',
+            difficulty: 'Hard',
+            follow_up: 'What would be your testing strategy for this component library?',
+            evaluation_criteria: ['Architecture design', 'TypeScript advanced features', 'Component patterns']
+          }
+        ],
+        'Sarah Wilson': [
+          {
+            category: 'Technical',
+            question: 'How would you implement user analytics tracking in a React application while maintaining user privacy?',
+            difficulty: 'Medium',
+            follow_up: 'What GDPR considerations would you need to account for?',
+            evaluation_criteria: ['Privacy awareness', 'Analytics implementation', 'Legal compliance']
+          },
+          {
+            category: 'Technical',
+            question: 'Design a system for A/B testing product features in a React application',
+            difficulty: 'Hard',
+            follow_up: 'How would you ensure statistical significance in your tests?',
+            evaluation_criteria: ['System design', 'Product thinking', 'Statistical understanding']
+          }
+        ]
+      },
+      behavioral: [
+        {
+          category: 'Behavioral',
+          question: `Tell me about a time when you had to learn ${candidate?.skills?.[0] || 'a new technology'} quickly for a project`,
+          difficulty: 'Medium',
+          follow_up: 'What was your learning strategy and how did you apply it?',
+          evaluation_criteria: ['Learning ability', 'Adaptability', 'Self-direction']
+        },
+        {
+          category: 'Behavioral',
+          question: 'Describe a situation where you disagreed with a technical decision made by your team',
+          difficulty: 'Medium',
+          follow_up: 'How did you handle the disagreement and what was the outcome?',
+          evaluation_criteria: ['Communication skills', 'Collaboration', 'Conflict resolution']
+        }
+      ],
+      system_design: [
+        {
+          category: 'System Design',
+          question: `Design a scalable web application similar to a tool you might use in ${candidate?.position || 'your role'}`,
+          difficulty: 'Hard',
+          follow_up: 'How would you handle high traffic and ensure reliability?',
+          evaluation_criteria: ['System architecture', 'Scalability thinking', 'Real-world application']
+        }
+      ],
+      cultural_fit: [
+        {
+          category: 'Cultural Fit',
+          question: `What motivates you most in ${candidate?.position || 'your work'} and how do you stay current with industry trends?`,
+          difficulty: 'Easy',
+          follow_up: 'How do you handle feedback and continuous improvement?',
+          evaluation_criteria: ['Self-awareness', 'Growth mindset', 'Industry engagement']
+        }
+      ]
+    }
+
+    const candidateQuestions = questionSets.technical[candidate?.name as keyof typeof questionSets.technical]
+    if (type === 'technical' && candidateQuestions) {
+      return candidateQuestions
+    }
+
+    return questionSets[type as keyof typeof questionSets] || questionSets.technical['John Smith']
+  }
+
+  const getMockQuestions = () => {
+    return [
+      {
+        category: 'Technical',
+        question: 'Explain the difference between React hooks and class components',
+        difficulty: 'Medium',
+        follow_up: 'When would you choose one over the other?',
+        evaluation_criteria: ['React knowledge', 'Understanding of modern patterns']
+      },
+      {
+        category: 'Technical',
+        question: 'How would you optimize a slow database query?',
+        difficulty: 'Hard',
+        follow_up: 'What tools would you use to identify the bottleneck?',
+        evaluation_criteria: ['Database optimization', 'Problem-solving approach']
+      },
+      {
+        category: 'Technical',
+        question: 'Describe how you would implement authentication in a React application',
+        difficulty: 'Medium',
+        follow_up: 'How would you handle token refresh?',
+        evaluation_criteria: ['Security understanding', 'Frontend architecture']
+      }
+    ]
+  }
 
   
 
@@ -186,18 +352,41 @@ const Interviews: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Select Candidate</label>
-                <select className="input-field">
-                  <option>John Smith - Frontend Developer</option>
-                  <option>Sarah Wilson - Product Manager</option>
-                  <option>Mike Johnson - Data Scientist</option>
+                <select 
+                  className="input-field"
+                  value={selectedCandidate}
+                  onChange={(e) => setSelectedCandidate(e.target.value)}
+                >
+                  <option value="">Choose candidate...</option>
+                  {mockCandidates.map(candidate => (
+                    <option key={candidate.id} value={candidate.id}>
+                      {candidate.name} - {candidate.position}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {['Technical', 'Behavioral', 'System Design', 'Cultural Fit'].map(type => (
-                    <button key={type} className="p-2 text-sm border rounded hover:bg-gray-50">
+                  {questionCategories?.categories?.map((category: any) => (
+                    <button 
+                      key={category.id} 
+                      onClick={() => setQuestionType(category.id)}
+                      className={`p-2 text-sm border rounded hover:bg-gray-50 ${
+                        questionType === category.id ? 'bg-blue-100 border-blue-500' : ''
+                      }`}
+                    >
+                      {category.name}
+                    </button>
+                  )) || ['Technical', 'Behavioral', 'System Design', 'Cultural Fit'].map(type => (
+                    <button 
+                      key={type} 
+                      onClick={() => setQuestionType(type.toLowerCase().replace(' ', '_'))}
+                      className={`p-2 text-sm border rounded hover:bg-gray-50 ${
+                        questionType === type.toLowerCase().replace(' ', '_') ? 'bg-blue-100 border-blue-500' : ''
+                      }`}
+                    >
                       {type}
                     </button>
                   ))}
@@ -206,49 +395,106 @@ const Interviews: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty Level</label>
-                <select className="input-field">
-                  <option>Junior (1-2 years)</option>
-                  <option>Mid-level (3-5 years)</option>
-                  <option>Senior (5+ years)</option>
+                <select 
+                  className="input-field"
+                  value={difficultyLevel}
+                  onChange={(e) => setDifficultyLevel(e.target.value)}
+                >
+                  {questionCategories?.difficulty_levels?.map((level: any) => (
+                    <option key={level.id} value={level.id}>{level.name}</option>
+                  )) || (
+                    <>
+                      <option value="junior">Junior (1-2 years)</option>
+                      <option value="mid-level">Mid-level (3-5 years)</option>
+                      <option value="senior">Senior (5+ years)</option>
+                    </>
+                  )}
                 </select>
               </div>
 
-              <button className="btn-primary w-full">
-                <Brain className="h-4 w-4 mr-2" />
-                Generate Questions
+              <button 
+                className="btn-primary w-full"
+                onClick={generateAIQuestions}
+                disabled={generatingQuestions || !selectedCandidate}
+              >
+                {generatingQuestions ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-4 w-4 mr-2" />
+                    Generate Questions
+                  </>
+                )}
               </button>
             </div>
           </div>
 
           {/* Generated Questions */}
-      <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Generated Questions</h3>
-          <div className="space-y-4">
-              {[
-                { category: 'Technical', question: 'Explain the difference between useMemo and useCallback in React', difficulty: 'Medium' },
-                { category: 'Problem Solving', question: 'How would you optimize a React component that re-renders frequently?', difficulty: 'Hard' },
-                { category: 'System Design', question: 'Design a real-time chat application architecture', difficulty: 'Hard' },
-                { category: 'Behavioral', question: 'Describe a time when you had to learn a new technology quickly', difficulty: 'Easy' }
-              ].map((q, index) => (
-                <div key={index} className="p-3 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{q.category}</span>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      q.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                      q.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {q.difficulty}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-700">{q.question}</p>
-                  <div className="flex space-x-2 mt-2">
-                    <button className="text-xs text-blue-600 hover:text-blue-800">Edit</button>
-                    <button className="text-xs text-green-600 hover:text-green-800">Use</button>
-                    <button className="text-xs text-red-600 hover:text-red-800">Remove</button>
-                  </div>
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Generated Questions
+              {generatedQuestions.length > 0 && (
+                <span className="ml-2 text-sm text-green-600">
+                  <CheckCircle className="h-4 w-4 inline mr-1" />
+                  {generatedQuestions.length} questions generated
+                </span>
+              )}
+            </h3>
+            <div className="space-y-4">
+              {generatingQuestions ? (
+                <div className="text-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-blue-500" />
+                  <p className="text-gray-600">AI is generating personalized questions...</p>
                 </div>
-              ))}
+              ) : generatedQuestions.length > 0 ? (
+                generatedQuestions.map((q, index) => (
+                  <div key={index} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {q.category || 'Technical'}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        q.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                        q.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {q.difficulty || 'Medium'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                    {q.follow_up && (
+                      <div className="bg-gray-50 p-2 rounded text-xs text-gray-600 mb-2">
+                        <strong>Follow-up:</strong> {q.follow_up}
+                      </div>
+                    )}
+                    {q.evaluation_criteria && (
+                      <div className="mb-2">
+                        <span className="text-xs text-gray-500">Evaluation criteria:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {q.evaluation_criteria.map((criteria: string, i: number) => (
+                            <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                              {criteria}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex space-x-2 mt-2">
+                      <button className="text-xs text-blue-600 hover:text-blue-800">Edit</button>
+                      <button className="text-xs text-green-600 hover:text-green-800">Use in Interview</button>
+                      <button className="text-xs text-red-600 hover:text-red-800">Remove</button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Brain className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>Select a candidate and click "Generate Questions" to create AI-powered interview questions</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
