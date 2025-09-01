@@ -65,29 +65,53 @@ git clone https://github.com/your-username/futureReady
 cd futureReady
 ```
 
-### 2. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-The frontend will be available at `http://localhost:5173`
+### 2. Quick Setup (Recommended)
+Run the automated setup scripts:
 
-### 3. Node.js Backend Setup
 ```bash
-cd backend
-npm install
-npm run dev
-```
-The API server will be available at `http://localhost:3001`
+# Install all dependencies
+./install-deps.bat
 
-### 4. Python AI Service Setup
-```bash
-cd backend/python-ai-service
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+# Start all services
+./start-dev.bat
 ```
-The AI service will be available at `http://localhost:8000`
+
+**That's it!** The scripts will automatically:
+- Install frontend dependencies (`npm install`)
+- Install backend dependencies (`npm install`) 
+- Install Python AI service dependencies (`pip install -r requirements.txt`)
+- Start all three services concurrently
+
+### 3. Manual Setup (Alternative)
+If you prefer manual setup:
+
+```bash
+# Frontend setup
+cd frontend && npm install
+
+# Backend setup  
+cd ../backend && npm install
+
+# Python AI service setup
+cd python-ai-service && pip install -r requirements.txt
+```
+
+Then start services manually:
+```bash
+# Terminal 1: Frontend
+cd frontend && npm run dev
+
+# Terminal 2: Backend  
+cd backend && npm run dev
+
+# Terminal 3: AI Service
+cd backend/python-ai-service && python -m uvicorn app.main:app --reload --port 8000
+```
+
+### 4. Access the Application
+- **Frontend**: `http://localhost:5173`
+- **Backend API**: `http://localhost:3001` 
+- **AI Service**: `http://localhost:8000`
 
 ### 5. Environment Variables
 Create `.env` files in both backend directories:
